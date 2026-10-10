@@ -1,4 +1,5 @@
 using Mostlylucid.Morph.Documents;
+using Mostlylucid.DocumentLedger.Core;
 
 namespace Morph.Avalonia.Demo;
 
@@ -13,6 +14,7 @@ public sealed class DemoLedger
     public List<ReviewedNeighborhood> ReviewedNeighborhoods { get; set; } = [];
     public List<DemoFeedback> Feedback { get; set; } = [];
     public List<DemoField> Fields { get; set; } = [];
+    public CoalescingSnapshot Coalescing { get; set; } = new();
 }
 
 public sealed class DemoField
@@ -27,6 +29,11 @@ public sealed class DemoField
     public string Selector { get; set; } = "label-relative";
     public int? Page { get; set; }
     public List<DemoRegion> Regions { get; set; } = [];
+    public string CanonicalRole { get; set; } = "";
+    public string Entity { get; set; } = "";
+    public string Period { get; set; } = "";
+    public string AddressComponent { get; set; } = "";
+    public string AssemblyGroup { get; set; } = "";
 }
 
 public sealed class DemoRegion

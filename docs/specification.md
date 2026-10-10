@@ -56,7 +56,7 @@ This is a required core extraction stage. Align locally discovered fields to can
 
 Scope observation coalescence by supported entity association, semantic role and effective period. Property and correspondence fields remain separate relationships even when their address values are identical. Missing components remain unknown; incompatible units, roles or dates remain separate or conflicting. Preserve each source observation and component region, record reversible merge decisions and prevent duplicated source lineage from inflating support.
 
-Use deterministic component comparisons as a baseline, optional embeddings for retrieval and bounded decisions for ambiguity. Validate both candidate values and proposed groups. Apply resolved-field cardinality after compatible observations have been coalesced. Current demo source does not yet implement this resolver.
+Use deterministic component comparisons as a baseline, optional embeddings for retrieval and bounded decisions for ambiguity. Validate both candidate values and proposed groups. Apply resolved-field cardinality after compatible observations have been coalesced. The independent address core and demo now implement this deterministic baseline, reviewed component assembly, reversible decisions and source provenance. Embedding/decision-provider integration and inferred scope remain future work.
 
 ## User workflow
 

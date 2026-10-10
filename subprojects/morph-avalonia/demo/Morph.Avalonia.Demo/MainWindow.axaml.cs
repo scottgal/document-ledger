@@ -7,6 +7,7 @@ using Avalonia.Media.Imaging;
 using Avalonia.Platform.Storage;
 using Avalonia.Threading;
 using Mostlylucid.Morph.Documents;
+using Mostlylucid.DocumentLedger.Core;
 using YamlDotNet.Serialization;
 using YamlDotNet.Serialization.NamingConventions;
 
@@ -15,8 +16,15 @@ namespace Morph.Avalonia.Demo;
 public partial class MainWindow : Window
 {
     private readonly string _sampleDirectory = Path.Combine(Path.GetTempPath(), "morph-avalonia", Guid.NewGuid().ToString("N"));
-    private readonly ISerializer _serializer = new SerializerBuilder().WithNamingConvention(UnderscoredNamingConvention.Instance).Build();
-    private readonly IDeserializer _deserializer = new DeserializerBuilder().WithNamingConvention(UnderscoredNamingConvention.Instance).Build();
+    private readonly ISerializer _serializer = new SerializerBuilder().WithTypeConverter(new YamlDotNet.Serialization.Converters.DateTimeOffsetConverter()).WithNamingConvention(UnderscoredNamingConvention.Instance).Build();
+    private readonly IDeserializer _deserializer = new DeserializerBuilder().WithTypeConverter(new YamlDotNet.Serialization.Converters.DateTimeOffsetConverter()).WithNamingConvention(UnderscoredNamingConvention.Instance)
+        .WithTypeMapping<IReadOnlyList<AddressObservation>, List<AddressObservation>>()
+        .WithTypeMapping<IReadOnlyList<SourceEvidence>, List<SourceEvidence>>()
+        .WithTypeMapping<IReadOnlyList<ReviewDecision>, List<ReviewDecision>>()
+        .WithTypeMapping<IReadOnlyList<ResolvedField>, List<ResolvedField>>()
+        .WithTypeMapping<IReadOnlyList<string>, List<string>>()
+        .WithTypeMapping<IReadOnlyDictionary<string, IReadOnlyList<string>>, Dictionary<string, IReadOnlyList<string>>>()
+        .Build();
     private DemoLedger _ledger = new();
     private DemoField? _selected;
     private DocumentSelection? _selection;
@@ -28,6 +36,7 @@ public partial class MainWindow : Window
     public MainWindow()
     {
         InitializeComponent();
+        InitializeCoalescing();
         OpenButton.Click += async (_, _) =>
         {
             var files = await StorageProvider.OpenFilePickerAsync(new()
@@ -50,7 +59,7 @@ public partial class MainWindow : Window
             _selection = selection;
             SelectionText.Text = selection.Text;
             SelectionLocation.Text = $"Page {selection.PageIndex + 1} · x {selection.Region.X:F3} · y {selection.Region.Y:F3}";
-            UseSelectionButton.IsEnabled = _selected is not null && !string.IsNullOrWhiteSpace(selection.Text);
+            SetAddressEditingState();
         };
         Viewer.HighlightSelected += async (_, highlight) =>
         {
@@ -61,6 +70,7 @@ public partial class MainWindow : Window
         {
             _suggestionCancellation?.Cancel();
             _ledger.Fields.Clear();
+            _coalescer = new(); _fieldObservations.Clear(); _checkedObservations.Clear();
             _ledger.Producer = "manual";
             _selected = null;
             ConfirmButton.IsEnabled = false;
@@ -74,7 +84,7 @@ public partial class MainWindow : Window
         SuggestButton.Click += async (_, _) => await SuggestFieldsAsync();
         ConfirmButton.Click += async (_, _) =>
         {
-            if (_selected is null) return;
+            if (_selected is null || _previewingEvidence || _capturingAddresses) return;
             RecordFeedback(_selected, "confirm-correction", FieldValueBox.Text ?? "");
             _selected.Value = FieldValueBox.Text ?? "";
             var field = _selected;
@@ -92,6 +102,8 @@ public partial class MainWindow : Window
                     Anchor = field.Anchor, Section = field.Section, Features = field.Centroid });
                 field.Centroid.IndependentExamples = _ledger.ReviewedNeighborhoods.Where(n => n.Field == field.Id)
                     .Select(n => n.SourceHash).Distinct().Count();
+                await CaptureAddressesAsync([field]);
+                if (version != _loadVersion) return;
                 RefreshLedger();
                 DemoStatus.Text = $"Confirmed {field.Label}. Draft template retains anchor, section and page neighborhood.";
             }
@@ -99,7 +111,7 @@ public partial class MainWindow : Window
         };
         UseSelectionButton.Click += (_, _) =>
         {
-            if (_selected is null || _selection is null) return;
+            if (_selected is null || _selection is null || _previewingEvidence || _capturingAddresses) return;
             RecordFeedback(_selected, "replace-evidence", _selection.Text.Trim());
             _selected.Value = _selection.Text.Trim();
             _selected.Page = _selection.PageIndex;
@@ -113,7 +125,7 @@ public partial class MainWindow : Window
             RefreshLedger();
             DemoStatus.Text = "Source region attached. Confirm the value to record your correction.";
         };
-        ApplyLedgerButton.Click += (_, _) => ApplyYaml();
+        ApplyLedgerButton.Click += async (_, _) => await ApplyYamlAsync();
         Closed += async (_, _) => { ++_loadVersion; _suggestionCancellation?.Cancel(); await Viewer.DisposeAsync(); };
         Opened += async (_, _) =>
         {
@@ -121,6 +133,7 @@ public partial class MainWindow : Window
             var path = documentIndex >= 0 && documentIndex + 1 < Program.Arguments.Length
                 ? Program.Arguments[documentIndex + 1] : SampleDocument.Create(_sampleDirectory);
             await OpenDocumentAsync(path);
+            if (Program.Arguments.Contains("--addresses")) await OpenDocumentAsync(SampleDocument.CreateAddresses(_sampleDirectory));
             var captureIndex = Array.IndexOf(Program.Arguments, "--capture");
             if (captureIndex >= 0 && captureIndex + 1 < Program.Arguments.Length)
             {
@@ -144,6 +157,10 @@ public partial class MainWindow : Window
             DemoStatus.Text = "Rendering and extracting label neighborhoods…";
             await Viewer.OpenAsync(path);
             if (version != _loadVersion) return;
+            _currentDocumentPath = Path.GetFullPath(path); _previewingEvidence = false;
+            ReturnToImportButton.IsVisible = false;
+            if (reusable.Length == 0) _coalescer = new();
+            _fieldObservations.Clear(); _checkedObservations.Clear();
             var ledger = new DemoLedger { Source = Path.GetFileName(path),
                 SourceHash = Convert.ToHexString(SHA256.HashData(await File.ReadAllBytesAsync(path))),
                 Producer = reusable.Length > 0 ? "draft-template-replay" : "manual",
@@ -151,6 +168,16 @@ public partial class MainWindow : Window
                 ReviewedNeighborhoods = reusable.Length > 0 ? _ledger.ReviewedNeighborhoods.ToList() : [] };
             var definitions = reusable.Length > 0
                 ? reusable.Select(f => (f.Id, f.Label, f.Anchor, f.Section)).ToArray()
+                : Path.GetFileName(path) == "sample-addresses.html"
+                    ? new[] {
+                        ("property_address", "Property address", "Property address:", "Property details"),
+                        ("subject_property", "Subject property", "Subject property:", "Property details"),
+                        ("street", "Street", "Street:", "Property details"),
+                        ("town", "Town", "Town:", "Property details"),
+                        ("postcode", "Postcode", "Postcode:", "Property details"),
+                        ("correspondence_address", "Correspondence address", "Correspondence address:", "Correspondence"),
+                        ("unit_two", "Property unit two", "Property unit two:", "Property details"),
+                        ("unit_three", "Property unit three", "Property unit three:", "Property details") }
                 : Path.GetFileName(path).StartsWith("sample-", StringComparison.Ordinal)
                     ? new[] {
                         ("applicant", "Applicant", "Applicant:", "APPLICATION RECORD"),
@@ -166,6 +193,20 @@ public partial class MainWindow : Window
                 if (version != _loadVersion) return;
                 var field = new DemoField { Id = definition.Item1, Label = definition.Item2,
                     Anchor = definition.Item3, Section = definition.Item4, Status = "missing" };
+                if (reusable.FirstOrDefault(f => f.Id == field.Id) is { } pattern)
+                {
+                    field.CanonicalRole = pattern.CanonicalRole;
+                    field.AddressComponent = pattern.AddressComponent;
+                    // Entity, period and reviewed assembly membership are source assertions, not reusable selectors.
+                }
+                if (Path.GetFileName(path) == "sample-addresses.html")
+                {
+                    field.CanonicalRole = field.Id == "correspondence_address" ? "correspondence.address" : "property.address";
+                    field.Entity = field.Id == "correspondence_address" ? "applicant-a" : "property-a";
+                    field.Period = "2026-10";
+                    field.AddressComponent = field.Id switch { "street" => "street", "town" => "locality", "postcode" => "postcode", _ => "" };
+                    field.AssemblyGroup = field.AddressComponent.Length > 0 ? "property-boxes" : "";
+                }
                 if (anchors.Count > 0)
                 {
                     var anchor = anchors[0];
@@ -175,7 +216,9 @@ public partial class MainWindow : Window
                     {
                         field.Value = line.Groups[1].Value.Trim();
                         var values = await Viewer.SearchEvidenceAsync(field.Value);
-                        var evidence = values.FirstOrDefault(m => m.PageIndex == anchor.PageIndex);
+                        var evidence = values.Where(m => m.PageIndex == anchor.PageIndex)
+                            .OrderBy(m => Math.Abs(m.Regions[0].Y - anchor.Regions[0].Y) * 10
+                                + Math.Abs(m.Regions[0].X - anchor.Regions[0].X)).FirstOrDefault();
                         field.Page = anchor.PageIndex;
                         field.Regions = (evidence?.Regions ?? anchor.Regions).Select(DemoRegion.From).ToList();
                         field.Status = "proposed";
@@ -186,6 +229,8 @@ public partial class MainWindow : Window
             }
             if (version != _loadVersion) return;
             _ledger = ledger;
+            await CaptureAddressesAsync(_ledger.Fields);
+            if (version != _loadVersion) return;
             if (!Path.GetFileName(path).StartsWith("sample-", StringComparison.Ordinal))
             {
                 _documentQueue = Directory.GetFiles(Path.GetDirectoryName(path)!, "*" + Path.GetExtension(path)).Order(StringComparer.Ordinal).ToArray();
@@ -214,14 +259,21 @@ public partial class MainWindow : Window
 
     private async Task SelectFieldAsync(DemoField field)
     {
+        if (_previewingEvidence) return;
         _selected = field;
         SelectedFieldLabel.Text = field.Label;
         FieldValueBox.Text = field.Value;
         AnchorBox.Text = field.Anchor;
         SectionBox.Text = field.Section;
+        CanonicalRoleBox.Text = field.CanonicalRole.Length > 0 ? field.CanonicalRole : Mostlylucid.DocumentLedger.Core.FieldRoleAlignment.AddressRole(field.Label, field.Section);
+        EntityScopeBox.Text = field.Entity;
+        PeriodScopeBox.Text = field.Period;
+        AddressComponentBox.Text = field.AddressComponent;
+        AssemblyGroupBox.Text = field.AssemblyGroup;
         ConfirmButton.IsEnabled = true;
         SelectionLocation.Text = field.Page is int p ? $"Page {p + 1} · {field.Anchor} · {field.Status}" : "No matching source yet. Draw a region to supply evidence.";
         UseSelectionButton.IsEnabled = _selection is not null && !string.IsNullOrWhiteSpace(_selection.Text);
+        SetAddressEditingState();
         try { await Viewer.ShowHighlightAsync(field.Id); }
         catch (OperationCanceledException) { }
         catch (Exception exception) { DemoStatus.Text = exception.Message; }
@@ -246,7 +298,8 @@ public partial class MainWindow : Window
             if (field.Page is int page)
                 highlights.AddRange(field.Regions.Select(r => new DocumentHighlight(field.Id, page, r.ToRegion(), field.Label)));
         }
-        Viewer.SetHighlights(highlights);
+        if (!_previewingEvidence) Viewer.SetHighlights(highlights);
+        RefreshCoalescing();
         LedgerEditor.Text = _serializer.Serialize(_ledger);
     }
 
@@ -266,6 +319,7 @@ public partial class MainWindow : Window
 
     private async Task AddFieldAsync()
     {
+        if (_previewingEvidence || _capturingAddresses) return;
         var label = NewFieldName.Text?.Trim();
         if (string.IsNullOrEmpty(label)) { DemoStatus.Text = "Enter a field name first."; return; }
         var field = new DemoField { Id = NewFieldId(label), Label = label, Anchor = label,
@@ -278,6 +332,8 @@ public partial class MainWindow : Window
             await SeedCentroidAsync(field);
             if (version != _loadVersion) return;
             _ledger.Fields.Add(field);
+            await CaptureAddressesAsync([field]);
+            if (version != _loadVersion) return;
             RecordFeedback(field, "add-field", field.Value);
             RefreshLedger();
             await SelectFieldAsync(field);
@@ -323,12 +379,13 @@ public partial class MainWindow : Window
 
     private async Task SuggestFieldsAsync()
     {
-        if (Viewer.PageCount == 0) return;
+        if (Viewer.PageCount == 0 || _previewingEvidence || _capturingAddresses) return;
         _suggestionCancellation?.Cancel();
         _suggestionCancellation?.Dispose();
         _suggestionCancellation = new CancellationTokenSource();
         var token = _suggestionCancellation.Token;
         var version = _loadVersion;
+        _suggesting = true;
         SuggestButton.IsEnabled = false;
         try
         {
@@ -382,17 +439,20 @@ public partial class MainWindow : Window
                 added++;
             }
             _ledger.Producer = "ollama:" + ModelBox.Text;
+            await CaptureAddressesAsync(_ledger.Fields);
+            if (version != _loadVersion) return;
             RefreshLedger();
             if (_ledger.Fields.Count > 0) await SelectFieldAsync(_ledger.Fields[0]);
             DemoStatus.Text = $"Local LLM added {added} source-checked draft fields. Review or override them; corrections feed the template.";
         }
         catch (OperationCanceledException) { if (version == _loadVersion) DemoStatus.Text = "Template suggestion cancelled."; }
         catch (Exception exception) { if (version == _loadVersion) DemoStatus.Text = $"Local LLM unavailable: {exception.Message}. Add fields manually."; }
-        finally { SuggestButton.IsEnabled = true; }
+        finally { _suggesting = false; SetAddressEditingState(); }
     }
 
-    private void ApplyYaml()
+    private async Task ApplyYamlAsync()
     {
+        if (_previewingEvidence || _capturingAddresses) return;
         try
         {
             var parsed = _deserializer.Deserialize<DemoLedger>(LedgerEditor.Text ?? "") ?? throw new InvalidDataException("Ledger is empty.");
@@ -403,7 +463,8 @@ public partial class MainWindow : Window
                 throw new InvalidDataException("Use unique field IDs containing lowercase letters, digits and underscores.");
             foreach (var field in parsed.Fields)
             {
-                if (string.IsNullOrWhiteSpace(field.Label) || field.Value is null || field.Regions is null || field.Anchor is null || field.Section is null || field.Centroid is null)
+                if (string.IsNullOrWhiteSpace(field.Label) || field.Value is null || field.Regions is null || field.Anchor is null || field.Section is null || field.Centroid is null
+                    || field.CanonicalRole is null || field.Entity is null || field.Period is null || field.AddressComponent is null || field.AssemblyGroup is null)
                     throw new InvalidDataException("Fields require label, value, anchor, section and regions.");
                 if (field.Status is not ("proposed" or "confirmed" or "missing")) throw new InvalidDataException("Status must be proposed, confirmed or missing.");
                 if (field.Page is int page && (page < 0 || page >= Viewer.PageCount)) throw new InvalidDataException("Page is a zero-based index within this document.");
@@ -414,6 +475,7 @@ public partial class MainWindow : Window
             // YAML edits also become feedback; do not let editing erase existing review history.
             parsed.Feedback = _ledger.Feedback;
             parsed.ReviewedNeighborhoods = _ledger.ReviewedNeighborhoods;
+            parsed.Coalescing = _ledger.Coalescing;
             foreach (var field in parsed.Fields)
             {
                 var old = _ledger.Fields.Find(f => f.Id == field.Id);
@@ -421,6 +483,7 @@ public partial class MainWindow : Window
                     RecordFeedback(old ?? field, "yaml-override", field.Value);
             }
             _ledger = parsed;
+            await CaptureAddressesAsync(_ledger.Fields, reconcileRemoved: true);
             _selected = _ledger.Fields.Find(f => f.Id == selectedId);
             ConfirmButton.IsEnabled = _selected is not null;
             if (_selected is not null)

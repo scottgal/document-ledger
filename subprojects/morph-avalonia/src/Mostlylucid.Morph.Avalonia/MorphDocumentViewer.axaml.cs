@@ -56,6 +56,7 @@ public partial class MorphDocumentViewer : UserControl, IAsyncDisposable
     public int CurrentPageIndex { get; private set; }
     public int PageCount => _session?.PageCount ?? 0;
     public string? SourcePath => _session?.SourcePath;
+    public string? RepresentationHash => _session?.RepresentationHash;
     public double Zoom => _zoom;
     public DocumentRenderOptions RenderOptions { get; set; } = new();
     public event EventHandler? DocumentOpened;
@@ -75,6 +76,18 @@ public partial class MorphDocumentViewer : UserControl, IAsyncDisposable
     {
         Dispatcher.UIThread.VerifyAccess();
         return _session?.GetPageTextAsync(pageIndex, cancellationToken) ?? Task.FromResult("");
+    }
+
+    public Task<string> GetEvidenceTextAsync(int pageIndex, PageRegion region, CancellationToken cancellationToken = default)
+    {
+        Dispatcher.UIThread.VerifyAccess();
+        return _session?.GetTextInRegionAsync(pageIndex, region, cancellationToken) ?? Task.FromResult("");
+    }
+
+    public Task SaveRepresentationAsync(string path, CancellationToken cancellationToken = default)
+    {
+        Dispatcher.UIThread.VerifyAccess();
+        return _session?.SaveRepresentationAsync(path, cancellationToken) ?? throw new InvalidOperationException("No document is open.");
     }
 
     /// <summary>Call on the UI thread. A newer load cancels and supersedes this request.</summary>

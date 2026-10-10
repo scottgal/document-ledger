@@ -28,6 +28,21 @@ The synthetic Word and HTML examples start with a few supplied label selectors t
 
 **Settings** selects a loopback Ollama endpoint and an installed generative model. The default is `qwen3.5:0.8b`, present on the inspected machine. Suggestions use `/api/generate` with a JSON schema, up to three pages/16,000 characters and a 90-second timeout. No model is downloaded. Value and anchor text must match a common page before evidence is attached; proposals remain unconfirmed. Small-model coverage varies. Manual creation remains available without a model server.
 
+## Address resolution
+
+**Address example → Coalescing** starts with eight synthetic observations. Five property mentions/components resolve to one value; the correspondence role stays separate; Flat 2 and Flat 3 remain conflicting alternatives. Disable automatic coalescing to compare against eight raw observations. Select observations and record a reviewed merge, separation or rejection; undo retains the original event and evidence.
+
+For a new address field, select it under Fields, then enter its canonical role, reviewed entity ID and effective period under Coalescing. Component fragments also need a reviewed source-block group. These assertions are not inferred by the current baseline. They appear in YAML with component evidence and versioned resolutions. Field changes supersede obsolete mappings without deleting their source evidence.
+
+**Save resolutions / Load resolutions** persist the address ledger as JSON. Source links use the hashed derived PDF cached in the session's temporary directory. Keep those files with the snapshot; it is not a self-contained document archive. When reviewing another document's evidence, return to the current import before editing its fields.
+
+```sh
+dotnet run --project demo/Morph.Avalonia.Demo -- \
+  --addresses --ux-test --script ux-scripts/coalescing.yaml --output artifacts/ux-coalescing
+```
+
+The independent [core project](../../src/Mostlylucid.DocumentLedger.Core/Mostlylucid.DocumentLedger.Core.csproj) has no Avalonia, Morph or model-server dependency. It supports a conservative UK-style address parser, deterministic scope/component guards and explicit review. Numerical embeddings, learned field aliases and inferred entities/periods remain follow-on work.
+
 ## Reusable components
 
 | Project | Responsibility |

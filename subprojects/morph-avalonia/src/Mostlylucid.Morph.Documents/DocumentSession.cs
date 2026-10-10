@@ -1,5 +1,6 @@
 using Morph;
 using Morph.PDFium;
+using System.Security.Cryptography;
 
 namespace Mostlylucid.Morph.Documents;
 
@@ -10,6 +11,7 @@ namespace Mostlylucid.Morph.Documents;
 public sealed class DocumentSession : IAsyncDisposable
 {
     private readonly PdfiumDocument _document;
+    private readonly byte[] _pdfBytes;
     private readonly SemaphoreSlim _gate = new(1, 1);
     private readonly PageTransform[] _transforms;
     private bool _disposed;
@@ -17,6 +19,8 @@ public sealed class DocumentSession : IAsyncDisposable
     private DocumentSession(string sourcePath, byte[] pdfBytes, IReadOnlyList<string> fontSubstitutions)
     {
         SourcePath = sourcePath;
+        _pdfBytes = pdfBytes;
+        RepresentationHash = Convert.ToHexString(SHA256.HashData(pdfBytes));
         FontSubstitutions = fontSubstitutions;
         _document = PdfiumDocument.Load(pdfBytes);
         try
@@ -39,6 +43,18 @@ public sealed class DocumentSession : IAsyncDisposable
     }
 
     public string SourcePath { get; }
+    public string RepresentationHash { get; }
+
+    public async Task SaveRepresentationAsync(string path, CancellationToken cancellationToken = default)
+    {
+        await _gate.WaitAsync(cancellationToken).ConfigureAwait(false);
+        try
+        {
+            ObjectDisposedException.ThrowIf(_disposed, this);
+            await File.WriteAllBytesAsync(path, _pdfBytes, cancellationToken).ConfigureAwait(false);
+        }
+        finally { _gate.Release(); }
+    }
     public IReadOnlyList<string> FontSubstitutions { get; }
     public IReadOnlyList<DocumentPage> Pages { get; }
     public int PageCount => Pages.Count;

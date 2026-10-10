@@ -1,0 +1,154 @@
+name: Semantic address coalescing
+description: Review repeated addresses, component assembly, roles, unit conflicts, layer toggles and reversible rejection.
+default_delay: 180
+actions:
+  - type: Expect
+    target: DemoStatus
+    matcher: ContainsText
+    value: 8 proposed fields
+    timeout: 20000
+  - type: Click
+    target: CoalescingTab
+  - type: Expect
+    target: CoalescingSummary
+    matcher: ContainsText
+    value: 8 active observations → 4 resolved fields
+  - type: Click
+    target: ZoomOutButton
+  - type: Click
+    target: ZoomOutButton
+  - type: Scroll
+    target: PageScroll
+    value: top
+  - type: Screenshot
+    value: 01-coalesced-addresses
+  - type: Click
+    target: Source_property_address
+  - type: Expect
+    target: DemoStatus
+    matcher: ContainsText
+    value: 'Source evidence:'
+  - type: Click
+    target: AutomaticCoalescingBox
+  - type: Expect
+    target: CoalescingSummary
+    matcher: ContainsText
+    value: 8 resolved fields
+  - type: Click
+    target: Observation_property_address
+  - type: Click
+    target: Observation_subject_property
+  - type: Click
+    target: MergeObservationsButton
+  - type: Expect
+    target: CoalescingSummary
+    matcher: ContainsText
+    value: 7 resolved fields
+  - type: Click
+    target: UndoCoalescingButton
+  - type: Expect
+    target: CoalescingSummary
+    matcher: ContainsText
+    value: 8 resolved fields
+  - type: Click
+    target: AutomaticCoalescingBox
+  - type: Click
+    target: Observation_unit_three
+  - type: Click
+    target: RejectObservationsButton
+  - type: Expect
+    target: CoalescingSummary
+    matcher: ContainsText
+    value: 7 active observations → 3 resolved fields
+  - type: Click
+    target: UndoCoalescingButton
+  - type: Expect
+    target: CoalescingSummary
+    matcher: ContainsText
+    value: 8 active observations → 4 resolved fields
+  - type: Click
+    target: LedgerTab
+  - type: Expect
+    target: LedgerEditor
+    matcher: ContainsText
+    value: 'component_evidence:'
+  - type: Click
+    target: ApplyLedgerButton
+  - type: Expect
+    target: DemoStatus
+    matcher: ContainsText
+    value: YAML applied
+  - type: Click
+    target: CoalescingTab
+  - type: Expect
+    target: CoalescingSummary
+    matcher: ContainsText
+    value: 8 active observations → 4 resolved fields
+  - type: Screenshot
+    value: 02-reviewed-coalescing
+  - type: Click
+    target: FieldsTab
+  - type: Click
+    target: Field_property_address
+  - type: TypeText
+    target: FieldValueBox
+    value: 42 Example St, Edinburgh, EH2 2BB
+  - type: Click
+    target: ConfirmButton
+  - type: Click
+    target: CoalescingTab
+  - type: Expect
+    target: CoalescingSummary
+    matcher: ContainsText
+    value: 8 active observations → 5 resolved fields
+  - type: Click
+    target: FieldsTab
+  - type: TypeText
+    target: FieldValueBox
+    value: 42 Example St, Edinburgh, EH11AA
+  - type: Click
+    target: ConfirmButton
+  - type: Click
+    target: CoalescingTab
+  - type: Expect
+    target: CoalescingSummary
+    matcher: ContainsText
+    value: 8 active observations → 4 resolved fields
+  - type: Click
+    target: FieldsTab
+  - type: Click
+    target: ReuseTemplateBox
+  - type: Click
+    target: WordSampleButton
+  - type: Expect
+    target: DemoStatus
+    matcher: ContainsText
+    value: 0 proposed fields
+    timeout: 20000
+  - type: Click
+    target: CoalescingTab
+  - type: Click
+    target: Source_property_address
+  - type: Expect
+    target: ReturnToImportButton
+    matcher: IsVisible
+  - type: Expect
+    target: ApplyLedgerButton
+    matcher: IsDisabled
+  - type: Expect
+    target: DemoStatus
+    matcher: ContainsText
+    value: 'Source evidence:'
+  - type: Click
+    target: AutomaticCoalescingBox
+  - type: Screenshot
+    value: 03-prior-document-evidence
+  - type: Click
+    target: ReturnToImportButton
+  - type: Expect
+    target: PageLabel
+    matcher: ContainsText
+    value: Page 1 of 2
+  - type: Expect
+    target: ApplyLedgerButton
+    matcher: IsEnabled

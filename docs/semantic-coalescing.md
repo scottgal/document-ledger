@@ -1,6 +1,18 @@
 # Semantic field deduplication and coalescing
 
-Status: required core extraction capability; contract and acceptance cases below. The current viewer/demo captures field evidence and reviewed neighbourhoods but does not implement this resolver.
+Status: implemented address baseline in [Mostlylucid.DocumentLedger.Core](../src/Mostlylucid.DocumentLedger.Core/AddressCoalescer.cs), integrated into the Avalonia example. The contract below also describes the broader inference direction.
+
+## Implemented baseline
+
+A dependency-free .NET 10 library retains append-only observations, source regions, extraction variants and review events. Deterministic aliases align local address labels; reviewed source-block groups assemble components; compatible addresses coalesce within explicit entity, role and effective-period scope. Conflicting components and unknown scope stay reviewable. Cardinality is checked on resolved fields.
+
+Merge, keep-separate, rejection and undo are replayable. Stable instance IDs and versioned resolutions retain component evidence and predecessor links, including split branches. Reimports are idempotent; producer duplicates and confirmed copied origins do not inflate independent support. Unknown lineage remains explicit.
+
+The demo has an automatic-layer toggle, observation selection, review reasons, source navigation, YAML inspection and JSON save/load. Corrections supersede prior mappings through rejection events. The actual derived PDF is cached and hashed so evidence from an earlier document can reopen its original representation.
+
+Limits: UK-style parsing and a small alias vocabulary; no geocoding, learned aliases, inferred entities/periods or automatic document-family inference. Unparsed content is retained. Pair comparison is quadratic, suitable for the small demonstration. `ICoalescingAdvisor` defines an extension point; no embedding or decision-provider adapter is wired yet. JSON snapshots retain local source/cache paths, not a portable document archive. YAML preserves the audit state while editing fields; review controls change decisions.
+
+[Core verification](../verification/Mostlylucid.DocumentLedger.Core.Verification/Program.cs) covers 98 checks. The [55-action UI script](../subprojects/morph-avalonia/ux-scripts/coalescing.yaml) exercises layer switching, review/undo, corrections/reversion, YAML round-trip and prior-document evidence.
 
 ## Purpose
 

@@ -10,7 +10,7 @@ Deliver the reusable Morph viewer plus a small two-panel demo. Keep the document
 4. Add StyloExtract behind the HTML adapter and an explicit single-page fetch for a lightweight scraping example.
 5. Compare deterministic selectors, text embeddings, image/text neighborhood embeddings, and embeddings plus Tev/Nimble decisions. Add MediaPipe Decision Maker as a separate candidate if its runtime is practical.
 
-Steps 1–2 are the current implementation, together with empty-template creation, a local generative starter, initial neighborhood seeds and draft label replay. Steps 3–5 are the next concept experiments. The larger milestone table below describes possible product development after the demo, not a requirement for this first pass.
+Steps 1–2 and the deterministic address-coalescing portion of step 3 are implemented, together with empty-template creation, a local generative starter, initial neighborhood seeds and draft label replay. Generalised variants, StyloExtract acquisition and inference-provider comparison remain the next experiments. The larger milestone table below describes possible product development after the demo, not a requirement for this first pass.
 
 The semantic coalescing contract is in [semantic-coalescing.md](semantic-coalescing.md). This is part of the extraction core; persistent workspace and entity-reconciliation infrastructure can follow separately.
 

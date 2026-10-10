@@ -1,4 +1,6 @@
 <Solution>
+  <Project Path="../../src/Mostlylucid.DocumentLedger.Core/Mostlylucid.DocumentLedger.Core.csproj" />
+  <Project Path="../../verification/Mostlylucid.DocumentLedger.Core.Verification/Mostlylucid.DocumentLedger.Core.Verification.csproj" />
   <Folder Name="/demo/">
     <Project Path="demo/Morph.Avalonia.Demo/Morph.Avalonia.Demo.csproj" />
   </Folder>

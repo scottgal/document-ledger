@@ -16,6 +16,7 @@
         <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
           <Button x:Name="WordSampleButton" Content="Word example" Background="#24364A" Foreground="White" />
           <Button x:Name="HtmlSampleButton" Content="HTML example" Background="#24364A" Foreground="White" />
+          <Button x:Name="AddressSampleButton" Content="Address example" Background="#24364A" Foreground="White" />
           <Button x:Name="NextDocumentButton" Content="Next document" IsVisible="False" Background="#24364A" Foreground="White" />
           <Button x:Name="OpenButton" Content="Open document…" Background="#72DCC6" Foreground="#111D2D" />
         </StackPanel>
@@ -55,6 +56,45 @@
                   <TextBox x:Name="SelectionText" Text="Use Select region, then drag over the document." IsReadOnly="True" TextWrapping="Wrap" AcceptsReturn="True" MinHeight="48" MaxHeight="80" />
                   <Button x:Name="UseSelectionButton" Content="Use selection for this field" HorizontalAlignment="Stretch" IsEnabled="False" />
                   <TextBlock Text="Corrections feed this draft. Label, neighbors and position seed the centroid; multimodal embeddings are a follow-on experiment." FontSize="12" TextWrapping="Wrap" Foreground="#526778" />
+                </StackPanel>
+              </ScrollViewer>
+            </TabItem>
+            <TabItem Header="Coalescing" x:Name="CoalescingTab">
+              <ScrollViewer x:Name="CoalescingScroll">
+                <StackPanel Spacing="10" Margin="0,12,0,0">
+                  <CheckBox x:Name="AutomaticCoalescingBox" Content="Coalesce compatible observations" IsChecked="True" />
+                  <TextBlock x:Name="CoalescingSummary" TextWrapping="Wrap" FontWeight="SemiBold" />
+                  <Expander Header="Selected field: role and scope">
+                    <StackPanel Spacing="7">
+                      <TextBox x:Name="CanonicalRoleBox" PlaceholderText="Canonical role, e.g. property.address" />
+                      <TextBox x:Name="EntityScopeBox" PlaceholderText="Reviewed entity ID" />
+                      <TextBox x:Name="PeriodScopeBox" PlaceholderText="Effective period / reviewed case period" />
+                      <TextBox x:Name="AddressComponentBox" PlaceholderText="Component (blank for a complete address)" />
+                      <TextBox x:Name="AssemblyGroupBox" PlaceholderText="Reviewed component group (same source block)" />
+                      <Button x:Name="ApplyAddressScopeButton" Content="Record address observation" />
+                    </StackPanel>
+                  </Expander>
+                  <TextBlock Text="Resolved fields" FontWeight="SemiBold" />
+                  <ScrollViewer MaxHeight="340"><StackPanel x:Name="ResolvedFieldsPanel" Spacing="8" /></ScrollViewer>
+                  <Expander Header="Compare / review original observations" IsExpanded="True">
+                    <StackPanel Spacing="8">
+                      <ScrollViewer MaxHeight="170"><StackPanel x:Name="ObservationPanel" Spacing="6" /></ScrollViewer>
+                      <TextBox x:Name="MergeReasonBox" PlaceholderText="Reason for this review decision" Text="Reviewed source evidence" />
+                      <WrapPanel>
+                        <Button x:Name="MergeObservationsButton" Content="Merge selected" Margin="0,0,6,6" />
+                        <Button x:Name="SeparateObservationsButton" Content="Keep separate" Margin="0,0,0,6" />
+                        <Button x:Name="RejectObservationsButton" Content="Reject selected" Margin="0,0,0,6" />
+                      </WrapPanel>
+                      <Button x:Name="UndoCoalescingButton" Content="Undo latest review" />
+                    </StackPanel>
+                  </Expander>
+                  <TextBlock x:Name="CoalescingConflicts" TextWrapping="Wrap" Foreground="#96412F" />
+                  <TextBlock x:Name="CoalescingHistory" TextWrapping="Wrap" FontSize="12" />
+                  <WrapPanel>
+                    <Button x:Name="SaveCoalescingButton" Content="Save resolutions…" Margin="0,0,6,6" />
+                    <Button x:Name="LoadCoalescingButton" Content="Load resolutions…" Margin="0,0,0,6" />
+                  </WrapPanel>
+                  <Button x:Name="ReturnToImportButton" Content="Return to current import" IsVisible="False" />
                 </StackPanel>
               </ScrollViewer>
             </TabItem>

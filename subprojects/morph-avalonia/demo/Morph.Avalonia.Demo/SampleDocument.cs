@@ -6,6 +6,31 @@ namespace Morph.Avalonia.Demo;
 
 public static class SampleDocument
 {
+    public static string CreateAddresses(string directory)
+    {
+        Directory.CreateDirectory(directory);
+        var path = Path.Combine(directory, "sample-addresses.html");
+        File.WriteAllText(path, """
+            <!doctype html><html><body>
+            <h1>PROPERTY ADDRESS EVIDENCE</h1>
+            <p>Synthetic example: one reviewed property, October 2026.</p>
+            <p>Property address: 42 Example St, Edinburgh, EH11AA</p>
+            <p>Subject property: 42 Example Street, Edinburgh, EH1 1AA</p>
+            <h2>Property details - separate boxes</h2>
+            <p>Street: 42 Example Street</p>
+            <p>Town: Edinburgh</p>
+            <p>Postcode: EH1 1AA</p>
+            <h2>Correspondence</h2>
+            <p>Correspondence address: 42 Example Street, Edinburgh, EH1 1AA</p>
+            <h2>Competing unit observations</h2>
+            <p>Property unit two: Flat 2, 42 Example Street, Edinburgh, EH1 1AA</p>
+            <p>Property unit three: Flat 3, 42 Example Street, Edinburgh, EH1 1AA</p>
+            <p>Equivalent mentions coalesce; distinct roles and incompatible units remain visible.</p>
+            </body></html>
+            """);
+        return path;
+    }
+
     public static string Create(string directory)
     {
         Directory.CreateDirectory(directory);
