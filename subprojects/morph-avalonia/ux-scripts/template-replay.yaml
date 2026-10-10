@@ -1,0 +1,61 @@
+name: Teach once and replay
+description: Seed a template manually on invoice 10248 and replay its label on invoice 10249.
+default_delay: 150
+actions:
+  - type: Expect
+    target: DemoStatus
+    matcher: ContainsText
+    value: New document
+    timeout: 20000
+  - type: TypeText
+    target: NewFieldName
+    value: Order ID
+  - type: Click
+    target: AddFieldButton
+  - type: Expect
+    target: SelectedFieldLabel
+    matcher: HasText
+    value: Order ID
+  - type: TypeText
+    target: FieldValueBox
+    value: '10248'
+  - type: TypeText
+    target: AnchorBox
+    value: 'Order ID:'
+  - type: Click
+    target: ConfirmButton
+  - type: Expect
+    target: DemoStatus
+    matcher: ContainsText
+    value: Confirmed Order ID
+  - type: Click
+    target: ReuseTemplateBox
+  - type: Click
+    target: NextDocumentButton
+  - type: Expect
+    target: DemoStatus
+    matcher: ContainsText
+    value: 1 proposed fields
+    timeout: 20000
+  - type: Expect
+    target: FieldValueBox
+    matcher: HasText
+    value: '10249'
+  - type: Click
+    target: ConfirmButton
+  - type: Expect
+    target: DemoStatus
+    matcher: ContainsText
+    value: Confirmed Order ID
+  - type: Click
+    target: LedgerTab
+  - type: Expect
+    target: LedgerEditor
+    matcher: ContainsText
+    value: 'independent_examples: 2'
+  - type: Expect
+    target: LedgerEditor
+    matcher: ContainsText
+    value: 'producer: draft-template-replay'
+  - type: Screenshot
+    value: 01-two-document-learning

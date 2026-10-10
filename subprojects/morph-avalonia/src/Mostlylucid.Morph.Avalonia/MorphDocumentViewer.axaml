@@ -1,0 +1,33 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             x:Class="Mostlylucid.Morph.Avalonia.MorphDocumentViewer">
+  <Grid RowDefinitions="Auto,*,Auto">
+    <Border Padding="10" Background="{DynamicResource SystemControlBackgroundChromeMediumLowBrush}">
+      <WrapPanel Orientation="Horizontal">
+        <Button x:Name="PreviousButton" Content="←" ToolTip.Tip="Previous page" Margin="0,0,6,0" />
+        <TextBlock x:Name="PageLabel" Text="No document" VerticalAlignment="Center" MinWidth="100" />
+        <Button x:Name="NextButton" Content="→" ToolTip.Tip="Next page" Margin="6,0,18,0" />
+        <Button x:Name="ZoomOutButton" Content="−" ToolTip.Tip="Zoom out" />
+        <TextBlock x:Name="ZoomLabel" Text="100%" Width="58" TextAlignment="Center" VerticalAlignment="Center" />
+        <Button x:Name="ZoomInButton" Content="+" ToolTip.Tip="Zoom in" />
+        <Button x:Name="FitButton" Content="Fit width" Margin="8,0,18,0" />
+        <TextBox x:Name="SearchBox" PlaceholderText="Find in document" Width="190" />
+        <Button x:Name="SearchButton" Content="Find" Margin="6,0,6,0" />
+        <Button x:Name="NextMatchButton" Content="Next match" />
+        <ToggleButton x:Name="SelectButton" Content="Select region" Margin="18,0,0,0" />
+      </WrapPanel>
+    </Border>
+    <ScrollViewer x:Name="PageScroll" Grid.Row="1" Background="#202833"
+                  HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto">
+      <Border Margin="24" HorizontalAlignment="Center" VerticalAlignment="Top">
+        <Grid x:Name="PageSurface" Background="White" IsVisible="False">
+          <Image x:Name="PageImage" Stretch="Fill" />
+          <Canvas x:Name="Overlay" Background="Transparent" />
+        </Grid>
+      </Border>
+    </ScrollViewer>
+    <Border Grid.Row="2" Padding="12,8" Background="{DynamicResource SystemControlBackgroundChromeMediumLowBrush}">
+      <TextBlock x:Name="StatusLabel" Text="Open a Word, PDF or HTML document." TextWrapping="Wrap" />
+    </Border>
+  </Grid>
+</UserControl>

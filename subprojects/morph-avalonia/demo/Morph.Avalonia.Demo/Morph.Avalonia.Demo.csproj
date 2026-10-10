@@ -1,0 +1,16 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <UITestingProject Condition="'$(UITestingProject)' == ''">../../../../../lucidRESUME/src/Mostlylucid.Avalonia.UITesting/Mostlylucid.Avalonia.UITesting.csproj</UITestingProject>
+    <OutputType>WinExe</OutputType>
+    <UseCurrentRuntimeIdentifier>true</UseCurrentRuntimeIdentifier>
+    <AppendRuntimeIdentifierToOutputPath>false</AppendRuntimeIdentifierToOutputPath>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="Avalonia.Desktop" Version="12.1.2" />
+    <PackageReference Include="Avalonia.Themes.Fluent" Version="12.1.2" />
+    <ProjectReference Include="$(UITestingProject)" Condition="Exists('$(UITestingProject)')" />
+    <PackageReference Include="Mostlylucid.Avalonia.UITesting" Version="1.7.1" Condition="!Exists('$(UITestingProject)')" />
+    <PackageReference Include="YamlDotNet" Version="18.1.0" />
+    <ProjectReference Include="../../src/Mostlylucid.Morph.Avalonia/Mostlylucid.Morph.Avalonia.csproj" />
+  </ItemGroup>
+</Project>

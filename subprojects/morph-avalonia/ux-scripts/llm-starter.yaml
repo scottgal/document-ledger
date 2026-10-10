@@ -1,0 +1,88 @@
+name: New document to initial template
+description: A real local model starts a template from an unfamiliar dataset PDF.
+default_delay: 150
+actions:
+  - type: Expect
+    target: DemoStatus
+    matcher: ContainsText
+    value: New document
+    timeout: 20000
+  - type: TypeText
+    target: NewFieldName
+    value: Order ID
+  - type: Click
+    target: AddFieldButton
+  - type: Expect
+    target: SelectedFieldLabel
+    matcher: HasText
+    value: Order ID
+  - type: TypeText
+    target: FieldValueBox
+    value: '10248'
+  - type: TypeText
+    target: AnchorBox
+    value: 'Order ID:'
+  - type: Click
+    target: ConfirmButton
+  - type: Expect
+    target: DemoStatus
+    matcher: ContainsText
+    value: Confirmed Order ID
+  - type: Click
+    target: LedgerTab
+  - type: Expect
+    target: LedgerEditor
+    matcher: ContainsText
+    value: confirm-correction
+  - type: Expect
+    target: LedgerEditor
+    matcher: ContainsText
+    value: pending-model
+  - type: Screenshot
+    value: 01-manual-seed
+  - type: Click
+    target: FieldsTab
+  - type: Click
+    target: NewTemplateButton
+  - type: Expect
+    target: DemoStatus
+    matcher: ContainsText
+    value: Blank template
+  - type: Click
+    target: SuggestButton
+  - type: Expect
+    target: DemoStatus
+    matcher: ContainsText
+    value: Local LLM added
+    timeout: 95000
+  - type: Expect
+    target: DemoStatus
+    matcher: MatchesRegex
+    value: 'Local LLM added [1-9][0-9]* source-checked draft fields'
+  - type: Screenshot
+    value: 02-model-draft
+  - type: TypeText
+    target: FieldValueBox
+    value: Reviewed override
+  - type: Click
+    target: ConfirmButton
+  - type: Expect
+    target: DemoStatus
+    matcher: ContainsText
+    value: Confirmed
+  - type: Click
+    target: LedgerTab
+  - type: Expect
+    target: LedgerEditor
+    matcher: ContainsText
+    value: 'state: initial'
+  - type: Expect
+    target: LedgerEditor
+    matcher: ContainsText
+    value: confirm-correction
+  - type: Expect
+    target: LedgerEditor
+    matcher: ContainsText
+    value: 'reviewed: true'
+  - type: Screenshot
+    value: 03-model-override

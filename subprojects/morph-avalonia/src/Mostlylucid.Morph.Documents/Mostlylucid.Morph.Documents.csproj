@@ -1,0 +1,11 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <ItemGroup>
+    <PackageReference Include="Morph.Pdf" Version="1.21.0" />
+    <PackageReference Include="Morph.PDFium" Version="1.4.0" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Fonts/**/*" Link="MorphFonts/%(Filename)%(Extension)"
+             CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest"
+             Pack="true" PackagePath="contentFiles/any/any/MorphFonts/" PackageCopyToOutput="true" />
+  </ItemGroup>
+</Project>

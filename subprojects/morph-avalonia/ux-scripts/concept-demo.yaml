@@ -1,0 +1,112 @@
+name: Document ledger concept
+description: Exercise the actual two-panel review workflow, rendering, and ledger editing.
+default_delay: 150
+actions:
+  - type: Expect
+    target: DemoStatus
+    matcher: ContainsText
+    value: 5 proposed fields
+    timeout: 20000
+  - type: Screenshot
+    value: 01-word-import
+  - type: Click
+    target: NextButton
+  - type: Expect
+    target: PageLabel
+    matcher: ContainsText
+    value: Page 2 of
+  - type: Click
+    target: Field_applicant
+  - type: Expect
+    target: PageLabel
+    matcher: ContainsText
+    value: Page 1 of
+  - type: Click
+    target: ZoomInButton
+  - type: Click
+    target: FitButton
+  - type: TypeText
+    target: SearchBox
+    value: Alex Morgan
+  - type: Click
+    target: SearchButton
+  - type: Expect
+    target: StatusLabel
+    matcher: ContainsText
+    value: Match 1 of
+  - type: Click
+    target: NextMatchButton
+  - type: Expect
+    target: PageLabel
+    matcher: ContainsText
+    value: Page 2 of
+  - type: Click
+    target: Field_applicant
+  - type: TypeText
+    target: FieldValueBox
+    value: Alex Morgan (reviewed)
+  - type: Click
+    target: ConfirmButton
+  - type: Expect
+    target: DemoStatus
+    matcher: ContainsText
+    value: Confirmed Applicant
+  - type: Click
+    target: LedgerTab
+  - type: Expect
+    target: LedgerEditor
+    matcher: ContainsText
+    value: 'status: confirmed'
+  - type: Screenshot
+    value: 02-reviewed-ledger
+  - type: Click
+    target: ApplyLedgerButton
+  - type: Expect
+    target: DemoStatus
+    matcher: ContainsText
+    value: YAML applied
+  - type: TypeText
+    target: LedgerEditor
+    value: 'version: 999'
+  - type: Click
+    target: ApplyLedgerButton
+  - type: Expect
+    target: DemoStatus
+    matcher: ContainsText
+    value: YAML rejected
+  - type: Click
+    target: FieldsTab
+  - type: Click
+    target: HtmlSampleButton
+  - type: Expect
+    target: DemoStatus
+    matcher: ContainsText
+    value: 2 proposed fields
+    timeout: 20000
+  - type: Expect
+    target: PageLabel
+    matcher: ContainsText
+    value: Page 1 of 1
+  - type: Screenshot
+    value: 03-html-import
+  - type: Click
+    target: WordSampleButton
+  - type: Expect
+    target: DemoStatus
+    matcher: ContainsText
+    value: 5 proposed fields
+    timeout: 20000
+  - type: Click
+    target: SelectButton
+  - type: Drag
+    x: 210
+    y: 235
+    x2: 370
+    y2: 275
+    steps: 12
+  - type: Expect
+    target: SelectionText
+    matcher: ContainsText
+    value: Alex
+  - type: Screenshot
+    value: 04-region-evidence

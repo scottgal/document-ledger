@@ -1,0 +1,12 @@
+<Solution>
+  <Folder Name="/demo/">
+    <Project Path="demo/Morph.Avalonia.Demo/Morph.Avalonia.Demo.csproj" />
+  </Folder>
+  <Folder Name="/src/">
+    <Project Path="src/Mostlylucid.Morph.Avalonia/Mostlylucid.Morph.Avalonia.csproj" />
+    <Project Path="src/Mostlylucid.Morph.Documents/Mostlylucid.Morph.Documents.csproj" />
+  </Folder>
+  <Folder Name="/verification/">
+    <Project Path="verification/Morph.Avalonia.Verification/Morph.Avalonia.Verification.csproj" />
+  </Folder>
+</Solution>
