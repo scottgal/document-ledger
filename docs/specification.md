@@ -50,6 +50,14 @@ ledger:
 
 This illustrative future artifact is richer than the demo's deliberately small YAML schema. Large vectors and private source assets can live in referenced sidecars; the human-editable artifact keeps settings, provenance and revision diffs readable.
 
+## Semantic deduplication and coalescing
+
+This is a required core extraction stage. Align locally discovered fields to canonical roles, assemble compatible fragments into typed values, deduplicate equivalent observations and resolve a canonical field value with retained provenance. Address is the reference case. See the [core contract and acceptance cases](semantic-coalescing.md).
+
+Scope observation coalescence by supported entity association, semantic role and effective period. Property and correspondence fields remain separate relationships even when their address values are identical. Missing components remain unknown; incompatible units, roles or dates remain separate or conflicting. Preserve each source observation and component region, record reversible merge decisions and prevent duplicated source lineage from inflating support.
+
+Use deterministic component comparisons as a baseline, optional embeddings for retrieval and bounded decisions for ambiguity. Validate both candidate values and proposed groups. Apply resolved-field cardinality after compatible observations have been coalesced. Current demo source does not yet implement this resolver.
+
 ## User workflow
 
 1. Start from a blank schema, a supplied template pack, or an existing ledger. Define entities, fields, types, required values, identity keys, and validation rules.
@@ -90,9 +98,11 @@ flowchart TD
     A[Preserve document and build representation] --> B[Match document family]
     B --> C[Apply qualified selectors and transforms]
     C --> D[Validate extracted candidates]
-    D -->|Unambiguous and policy permits| E[Propose ledger observation]
+    D -->|Unambiguous and policy permits| R[Assemble components and coalesce compatible observations]
     D -->|Ambiguous| F[Local typed decision]
-    F --> E
+    F --> R
+    R --> V[Check group consistency and resolved cardinality]
+    V --> E[Propose ledger observation with resolution provenance]
     E --> G[Review evidence and resolve values]
     G --> H[Propose template revision]
     H --> I[Replay examples and qualify]

@@ -6,11 +6,13 @@ Deliver the reusable Morph viewer plus a small two-panel demo. Keep the document
 
 1. Render synthetic Word/PDF and local HTML with linked evidence.
 2. Exercise field selection, corrections, region capture and YAML editing through the lucidRESUME Avalonia framework; inspect screenshots and tune the interaction.
-3. Add two form variants and a competing address area; demonstrate a draft neighborhood selector replaying across changed values.
+3. Add two form variants and a competing address area; demonstrate a draft neighborhood selector replaying across changed values. Add the core semantic coalescing stage: align field aliases, assemble address components and consolidate compatible observations with reversible provenance. Exercise identical values in different roles, differing units and repeated source lineage.
 4. Add StyloExtract behind the HTML adapter and an explicit single-page fetch for a lightweight scraping example.
 5. Compare deterministic selectors, text embeddings, image/text neighborhood embeddings, and embeddings plus Tev/Nimble decisions. Add MediaPipe Decision Maker as a separate candidate if its runtime is practical.
 
 Steps 1–2 are the current implementation, together with empty-template creation, a local generative starter, initial neighborhood seeds and draft label replay. Steps 3–5 are the next concept experiments. The larger milestone table below describes possible product development after the demo, not a requirement for this first pass.
+
+The semantic coalescing contract is in [semantic-coalescing.md](semantic-coalescing.md). This is part of the extraction core; persistent workspace and entity-reconciliation infrastructure can follow separately.
 
 ## Later milestones
 

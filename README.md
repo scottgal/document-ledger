@@ -4,6 +4,8 @@ Structured extraction from unstructured documents using live semantic templates.
 
 A template defines the fields, types, cardinality and relationships we want to recover. Reviewed source evidence supplies reusable extraction patterns. Semantic fields can have several variants across document types; applicability should be inferred from document and local context.
 
+The extraction core must also align synonymous fields, assemble fragmented values and coalesce equivalent observations into canonical fields with retained evidence. Address is the reference case: preserve distinct semantic roles, entities, units and periods. The [semantic coalescing contract](docs/semantic-coalescing.md) specifies this required stage; its resolver is not yet implemented in the example.
+
 This repository contains the research notes and the first concrete example: a native Avalonia workbench with Morph Word/PDF/HTML rendering, linked evidence, manual teaching, local LLM suggestions and editable YAML. Generalised field variants and embedding/decision-model inference are the research direction; the running example currently replays simple label anchors.
 
 ![Source document and extracted fields](docs/images/semantic-ledger-source-and-fields.png)
@@ -32,6 +34,7 @@ See the [component README](subprojects/morph-avalonia/README.md) for model setti
 
 - [Research and references](docs/research.md)
 - [Architecture specification](docs/specification.md)
+- [Core semantic coalescing contract](docs/semantic-coalescing.md)
 - [Initial prototype and bootstrap](docs/initial-centroid.md)
 - [Implementation plan](docs/plan.md)
 - [Recorded verification](docs/verification.md)

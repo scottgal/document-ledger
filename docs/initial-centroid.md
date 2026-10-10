@@ -28,6 +28,10 @@ Missing features are explicit. A text-only document adapter may not provide font
 
 For address initialization, use generic role descriptions and schema constraints as priors, then seed observed anchors and relations from the first form. Preserve “property address” and “correspondence address” as different roles. Initialize both text and visual views when the runtime is available; avoid collapsing those views into arbitrary concatenated numeric features. Qualify their weighting with the actual dataset.
 
+## Coalescing knowledge in the seed
+
+Seed the canonical role separately from local field labels and extraction variants. Retain address components and their individual source spans, candidate equivalence/assembly links, entity and effective-period context, and reviewed merge or keep-separate decisions. A single example cannot establish equivalence across documents. Identical values in different roles remain separate field relationships; repeated source evidence does not inflate independent support. The [core coalescing contract](semantic-coalescing.md) defines the required resolution stage.
+
 ## Model responsibilities
 
 A small generative model can propose a vocabulary and initial selectors when the schema is unknown. The demo uses an installed local Ollama model for this step. Tev/Nimble then have a bounded set of fields, templates or candidates to choose among; their typed decisions fit that later stage. EmbeddingGemma 2 retrieves similar labels and neighborhoods. A multimodal decision engine is an optional comparison for ambiguities that require visual reasoning.
